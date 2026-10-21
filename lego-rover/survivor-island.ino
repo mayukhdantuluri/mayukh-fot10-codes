@@ -5,18 +5,17 @@ Survivor Island
 Block X | Group 2
 Group Members: Mayukh Dantuluri, Rowel Mondal, Jiya Rao
 
-Last Edited on 2026-10-15, 19:30 UTC-4
+Last Edited on 2026-10-21, 10:05 UTC-4
 */
 
 // Arduino Motor Shield Rev3 Pins (Kept from the Roomba Challenge)
 const int dirA = 12; // Motor A Direction (right)
 const int pwmA = 3;  // Motor A Speed
 const int dirB = 8;  // Motor B Direction (left)
-const int pwmB = 7;  // Motor B Speed
-// pwmB had to be moved from Pin 11 to 7 after we found the RGB preferred pins meant using 11 for blue
+const int pwmB = 11; // Motor B Speed
 
 // Bumper Pin Constants (Kept from the Roomba Challenge)
-const int BUMPER_PIN_LEFT = A4;
+const int BUMPER_PIN_LEFT = A3; // A4 got clogged by a wire bit that we physically have a hard time removing
 const int BUMPER_PIN_RIGHT = A2;
 
 // Light Sensor Pin (Moved to A5 because A0 & A1 don't work apparently)
@@ -25,11 +24,11 @@ const int LIGHT_SENSOR_PIN = A5;
 // RGB LED Pins
 const int LED_R = 9;  // Red
 const int LED_G = 10; // Green
-const int LED_B = 11; // Blue
+const int LED_B = 6;  // Blue
 
 // Threshold values based on testing (lighter values = higher numbers)
-const int WATER_THRESHOLD = 8; // Below this is water (darker), should triggers ESCAPE MANEUVER
-const int SAND_THRESHOLD = 16; // Above this is sand (lighter)
+const int WATER_THRESHOLD = 75; // Below this is water (darker), should trigger ESCAPE MANEUVER
+const int SAND_THRESHOLD = 110; // Above this is sand (lighter)
 // In between WATER_THRESHOLD and SAND_THRESHOLD is the grassy terrain
 
 void setup() {
@@ -52,9 +51,10 @@ void setup() {
 }
 
 void setLEDColor(int r, int g, int b) {
-  analogWrite(LED_R, r);
-  analogWrite(LED_G, g);
-  analogWrite(LED_B, b);
+  // Inverted Common Anode RGB LEDs (0 = ON, 255 = OFF)
+  analogWrite(LED_R, 255 - r);
+  analogWrite(LED_G, 255 - g);
+  analogWrite(LED_B, 255 - b);
 }
 
 void moveForward() {
@@ -151,7 +151,7 @@ void loop() {
   if (ldrval <= WATER_THRESHOLD) {
     setLEDColor(0, 0, 255); // Blue = water
   } else if (ldrval >= SAND_THRESHOLD) {
-    setLEDColor(255, 0, 0); // Red = sand (Yellow didn't look good with the light sensor we were using)
+    setLEDColor(255, 0, 0); // Red = sand
   } else {
     setLEDColor(0, 255, 0); // Green = grass
   }
@@ -169,7 +169,7 @@ void loop() {
   } 
   // Priority 3: Terrain Announcement & Normal Movement
   else {
-    moveForward(); 
+    moveForward();
   }
 
   delay(100);
